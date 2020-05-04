@@ -111,7 +111,7 @@ env.bak/
 venv.bak/
 
 # PyCharm 
-.idea/
+.idea
 
 # Spyder project settings
 .spyderproject
