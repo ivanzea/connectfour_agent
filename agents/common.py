@@ -3,12 +3,14 @@ import re
 from enum import Enum
 from itertools import groupby
 from typing import Optional
+from typing import Callable, Tuple
+
 
 PlayerAction = np.int8
 BoardPiece = np.int8
 NO_PLAYER = BoardPiece(0)
-PLAYER_1 = BoardPiece(1)
-PLAYER_2 = BoardPiece(2)
+PLAYER1 = BoardPiece(1)
+PLAYER2 = BoardPiece(2)
 
 
 class GameState(Enum):
@@ -67,7 +69,7 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
 
 def connected_four(board: np.ndarray, player: BoardPiece, last_action: Optional[PlayerAction] = None, ) -> bool:
     player_board = initialize_game_state()
-    player_board[board == player] = PLAYER_1
+    player_board[board == player] = PLAYER1
 
     h_win = [np.array(i) for i in player_board]
     v_win = [np.array(i) for i in player_board.T]
@@ -90,3 +92,13 @@ def check_end_state(board: np.ndarray, player: BoardPiece, last_action: Optional
         return GameState(-1)
     else:
         return GameState(0)
+
+
+class SavedState:
+    pass
+
+
+GenMove = Callable[
+    [np.ndarray, BoardPiece, Optional[SavedState]],  # Arguments for the generate_move function
+    Tuple[PlayerAction, Optional[SavedState]]  # Return type of the generate_move function
+]

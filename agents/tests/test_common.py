@@ -1,9 +1,6 @@
 from typing import List
-
 import numpy as np
-from numpy.core._multiarray_umath import ndarray
-
-import connectn.common as cc
+import agents.common as cc
 
 
 def test_initialize_game_state():
@@ -56,7 +53,7 @@ def test_connected_four():
                            [0, 0, 1, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER_1)
+    assert cc.connected_four(test_board, cc.PLAYER1)
 
     # Vertical
     test_board = np.array([[0, 0, 1, 0, 0, 0, 0],
@@ -65,7 +62,7 @@ def test_connected_four():
                            [0, 0, 1, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER_1)
+    assert cc.connected_four(test_board, cc.PLAYER1)
 
     # Diagonal I
     test_board = np.array([[0, 1, 1, 0, 0, 0, 0],
@@ -74,7 +71,7 @@ def test_connected_four():
                            [0, 0, 1, 0, 1, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER_1)
+    assert cc.connected_four(test_board, cc.PLAYER1)
 
     # Diagonal II
     test_board = np.array([[0, 0, 1, 0, 0, 0, 0],
@@ -83,7 +80,7 @@ def test_connected_four():
                            [1, 0, 1, 0, 0, 0, 0],
                            [0, 1, 0, 0, 0, 0, 0],
                            [1, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER_1)
+    assert cc.connected_four(test_board, cc.PLAYER1)
 
     # No connection
     test_board = np.array([[0, 0, 1, 0, 0, 0, 0],
@@ -92,7 +89,7 @@ def test_connected_four():
                            [0, 0, 1, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert not cc.connected_four(test_board, cc.PLAYER_1)
+    assert not cc.connected_four(test_board, cc.PLAYER1)
 
     # player 2 - no connection
     test_board = np.array([[0, 2, 1, 2, 2, 1, 2],
@@ -101,7 +98,7 @@ def test_connected_four():
                            [2, 0, 1, 0, 0, 0, 0],
                            [0, 0, 2, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert not cc.connected_four(test_board, cc.PLAYER_2)
+    assert not cc.connected_four(test_board, cc.PLAYER2)
 
     # Diagonal II player 2
     test_board = np.array([[2, 2, 1, 2, 2, 1, 0],
@@ -110,7 +107,7 @@ def test_connected_four():
                            [1, 2, 1, 2, 0, 0, 0],
                            [2, 1, 2, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER_2)
+    assert cc.connected_four(test_board, cc.PLAYER2)
 
 def test_end_state():
     # Player one should still be playing
@@ -120,7 +117,7 @@ def test_end_state():
                            [1, 2, 1, 1, 1, 2, 2],
                            [2, 1, 2, 2, 1, 1, 1],
                            [2, 2, 2, 1, 2, 0, 2]], dtype=np.int8)
-    assert cc.check_end_state(test_board, cc.PLAYER_1) == cc.GameState(0)
+    assert cc.check_end_state(test_board, cc.PLAYER1) == cc.GameState(0)
 
     # Player two should have a win condition
     test_board = np.array([[2, 2, 1, 2, 2, 1, 1],
@@ -129,7 +126,7 @@ def test_end_state():
                            [1, 2, 1, 1, 1, 2, 2],
                            [2, 1, 2, 2, 1, 1, 1],
                            [2, 2, 2, 2, 2, 0, 2]], dtype=np.int8)
-    assert cc.check_end_state(test_board, cc.PLAYER_2) == cc.GameState(1)
+    assert cc.check_end_state(test_board, cc.PLAYER2) == cc.GameState(1)
 
     # Tie for P1
     test_board = np.array([[2, 2, 1, 2, 2, 1, 1],
@@ -138,7 +135,7 @@ def test_end_state():
                            [1, 2, 1, 1, 1, 2, 2],
                            [2, 1, 2, 2, 1, 1, 1],
                            [2, 2, 2, 1, 2, 1, 2]], dtype=np.int8)
-    assert cc.check_end_state(test_board, cc.PLAYER_1) == cc.GameState(-1)
+    assert cc.check_end_state(test_board, cc.PLAYER1) == cc.GameState(-1)
 
     # Tie for P2
     test_board = np.array([[2, 2, 1, 2, 2, 1, 1],
@@ -147,4 +144,4 @@ def test_end_state():
                            [1, 2, 1, 1, 1, 2, 2],
                            [2, 1, 2, 2, 1, 1, 1],
                            [2, 2, 2, 1, 2, 1, 2]], dtype=np.int8)
-    assert cc.check_end_state(test_board, cc.PLAYER_2) == cc.GameState(-1)
+    assert cc.check_end_state(test_board, cc.PLAYER2) == cc.GameState(-1)
