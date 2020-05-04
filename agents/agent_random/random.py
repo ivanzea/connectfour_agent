@@ -5,6 +5,7 @@ from agents.common import PLAYER1, PLAYER2, NO_PLAYER
 from typing import Tuple, Optional
 
 
+# Randomly generate a possible action
 def generate_move_random(
     board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState]
 ) -> Tuple[PlayerAction, Optional[SavedState]]:
