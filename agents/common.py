@@ -87,11 +87,11 @@ def check_end_state(board: np.ndarray, player: BoardPiece, last_action: Optional
 
     # Check for a win condition
     if connected_four(board, player):
-        return GameState(1)
+        return GameState.IS_WIN
     elif poss_actions.shape[0] == 0:   # check for no more possible actions... a draw
-        return GameState(-1)
+        return GameState.IS_DRAW
     else:
-        return GameState(0)
+        return GameState.STILL_PLAYING
 
 
 class SavedState:
