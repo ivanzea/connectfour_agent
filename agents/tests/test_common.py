@@ -1,32 +1,91 @@
-from typing import List
+"""
+test_common.py:
+    Rigorous tests for each function in common.py
+"""
+# Import packages
 import numpy as np
 import agents.common as cc
-
+from itertools import combinations
+from agents.common import  PlayerAction, BoardPiece
+from agents.common import NO_PLAYER, PLAYER1, PLAYER2
 
 def test_initialize_game_state():
-    ret = cc.initialize_game_state()
+    """
+    test for initialize_game_state()
+        - np.ndarray type
+        - dimensions of (6, 7)
+        - filled with NO_PLAYER pieces -> also being BoardPiece
+    """
+    # Function output
+    out = cc.initialize_game_state()
 
-    assert isinstance(ret, np.ndarray)
-    assert ret.dtype == np.int8
-    assert ret.shape == (6, 7)
-    assert np.all(ret == 0)
+    # Test output
+    assert isinstance(out, np.ndarray)
+    assert out.dtype == BoardPiece
+    assert out.shape == (6, 7)
+    assert np.all(out == NO_PLAYER)
 
 
 def test_pretty_print_board():
-    board = cc.initialize_game_state()
-    ret = cc.pretty_print_board(board)
+    """
+    test for pretty_print_board
+        - be str type
+        - have a length of 153
+        - PLAYER1 and PLAYER2 tokens placed correctly [ visual inspection ]
+    """
+    # Make transfer variables for ease of use
+    n = NO_PLAYER
+    o = PLAYER1
+    x = PLAYER2
 
-    assert isinstance(ret, str)
+    # Define test board:
+    #   ARROW pointing UP
+    #   PLAYER1 -> 'O' make the head of the arrow
+    #   PLAYER2 -> 'X' make the body of the arrow
+    test_board = np.array([[n, n, n, o, n, n, n],
+                           [n, n, o ,o, o, n, n],
+                           [n, o, o, o, o, o, n],
+                           [n, n, x, x, x, n, n],
+                           [n, n, x, x, x, n, n],
+                           [n, n, x, x, x, n, n],])
+
+    # Function output
+    out = cc.pretty_print_board(test_board)
+
+    # Test output
+    assert isinstance(out, str)
+    assert len(out) == 153
+
+    # Visual inspection
+    print('\n\nThis should be an ARROW pointing DOWN \n \'O\': head\n \'X\': body')
+    print(out)
 
 
 def test_string_to_board():
-    board = cc.initialize_game_state()
-    pp_board = cc.pretty_print_board(board)
-    ret = cc.string_to_board(pp_board)
+    """
+    test for string_to_board():
+        - np.ndarray type
+        - dimensions of (6, 7)
+        - BoardPiece type
+        - Correct conversion of ['O', 'X'] -> [PLAYER1, PLAYER2] types
 
-    assert isinstance(ret, np.ndarray)
-    assert ret.dtype == np.int8
-    assert ret.shape == (6, 7)
+    """
+    test_string = ('|--------------|\n',
+                   '|              |\n',
+                   '|              |\n',
+                   '|              |\n',
+                   '|              |\n',
+                   '|      X       |\n', # PLAYER2 at (1, )
+                   '|      O       |\n',
+                   '|--------------|\n',
+                   '|0 1 2 3 4 5 6 |\n')
+
+
+    # Test output
+    assert isinstance(out, np.ndarray)
+    assert out.dtype == BoardPiece
+    assert out.shape == (6, 7)
+    assert np.all(out == NO_PLAYER)
 
 
 def test_apply_player_action():
