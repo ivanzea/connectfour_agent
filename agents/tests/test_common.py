@@ -5,7 +5,6 @@ test_common.py:
 # Import packages
 import numpy as np
 import agents.common as cc
-from itertools import combinations
 from agents.common import  PlayerAction, BoardPiece
 from agents.common import NO_PLAYER, PLAYER1, PLAYER2
 
@@ -68,105 +67,115 @@ def test_string_to_board():
         - dimensions of (6, 7)
         - BoardPiece type
         - Correct conversion of ['O', 'X'] -> [PLAYER1, PLAYER2] types
-
     """
-    test_string = ('|--------------|\n',
-                   '|              |\n',
-                   '|              |\n',
-                   '|              |\n',
-                   '|              |\n',
-                   '|      X       |\n', # PLAYER2 at (1, )
-                   '|      O       |\n',
-                   '|--------------|\n',
+    test_string = ('|--------------|\n'
+                   '|              |\n'
+                   '|              |\n'
+                   '|              |\n'
+                   '|              |\n'
+                   '|      X       |\n' # PLAYER2 at (1, 3)
+                   '|      O       |\n' # PLAYER1 at (0, 3)
+                   '|--------------|\n'
                    '|0 1 2 3 4 5 6 |\n')
 
+    # Function output
+    out = cc.string_to_board(test_string)
 
     # Test output
     assert isinstance(out, np.ndarray)
     assert out.dtype == BoardPiece
     assert out.shape == (6, 7)
-    assert np.all(out == NO_PLAYER)
+    assert out[0, 3] == PLAYER1
+    assert out[1, 3] == PLAYER2
 
 
 def test_apply_player_action():
+    """
+    test for apply_player_action()
+        - PLAYER1 and PLAYER2 actions are played correctly
+        - player actions can not go above full columns
+    """
+    # Initialize a test game
     board = cc.initialize_game_state()
-    player_turns = np.array([1, 2, 1, 2, 1, 2, 1], dtype=np.int8)
+    players = [PLAYER1, PLAYER2]
+    player_turn = 0
 
-    for i, player in enumerate(player_turns):
-        cp_board = board.copy()
-        board = cc.apply_player_action(board, np.int8(2), player)
+    # Initialize test variables
+    theoretical_sum = np.zeros((board.shape[1],))
 
-        if i < player_turns.shape[0]-1:
-            assert (cp_board != board).all
+    # Play with random agents until board is full
+    while cc.possible_actions(board).shape[0] != 0:
+        # Who is playing?
+        player = players[player_turn]
+
+        # Take a random action
+        action = np.random.randint(board.shape[1], dtype=PlayerAction)
+
+        # Function output -> apply action
+        out = cc.apply_player_action(board=board, action=action, player=player, copy=True)
+
+        # Test output
+        # Calculate the sum of columns in the output
+        empirical_sum = out.sum(axis=0)
+
+        if np.isin(action, cc.possible_actions(board)):
+            # The action can be taken and the corresponding player piece should affect the corresponding column
+            # Update the theoretical sum of columns
+            theoretical_sum[action] += player
+
+            # Change turn for next round
+            player_turn = (player_turn - 1) * -1
+
+            # Update board
+            board = out
+
+            assert np.all(theoretical_sum == empirical_sum)
         else:
-            assert (cp_board == board).all  # no action should be taken
+            # The action can not be taken because of a full column
+            # The same player should play again and the board should have not been altered -> no theoretical update
+            assert np.all(theoretical_sum == empirical_sum)
 
-        print(cc.pretty_print_board(board))
+        # Test output
+        assert isinstance(out, np.ndarray)
+        assert out.dtype == BoardPiece
+        assert out.shape == (6, 7)
 
 
 def test_connected_four():
-    # Horizontal
-    test_board = np.array([[0, 0, 1, 0, 0, 0, 0],
-                           [1, 1, 1, 1, 0, 0, 0],
-                           [0, 1, 0, 1, 0, 0, 0],
-                           [0, 0, 1, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
+    """
+    test for connected_four():
+        - winning conditions are picked up
+            - horizontal
+            - vertical
+            - diagonal 45deg
+            - diagonal 135deg
+        - win is possible for both players
+        - no win is picked up also for both players
+    """
+    # Make transfer variables for ease of use
+    n = NO_PLAYER
+    o = PLAYER1
+    x = PLAYER2
+
+    for p, d in zip([PLAYER1, PLAYER2], [PLAYER2, PLAYER1]):
+        # Test board for horizontal and vertical + distractions
+        board1 = np.array([[p, p, p, p, n, n, n],
+                           [d, n, d, n, d, n, d],
+                           [n, n, n, n, n, n, n],
+                           [n, d, n, d, n, d, n],
+                           [n, n, n, n, n, n, n],
+                           [d, n, d, n, d, n, d]])
+
+        # Test board for 45deg diagonal and 135deg diagonal + distractions
+        board2 = np.array([[p, d, n, d, n, d, n],
+                           [n, p, n, n, n, n, n],
+                           [d, n, p, n, d, n, d],
+                           [n, n, n, p, n, n, n],
+                           [n, d, n, d, n, d, n],
+                           [n, n, n, n, n, n, n]])
+        #
     assert cc.connected_four(test_board, cc.PLAYER1)
 
-    # Vertical
-    test_board = np.array([[0, 0, 1, 0, 0, 0, 0],
-                           [1, 0, 1, 1, 0, 0, 0],
-                           [0, 1, 1, 1, 0, 0, 0],
-                           [0, 0, 1, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER1)
-
-    # Diagonal I
-    test_board = np.array([[0, 1, 1, 0, 0, 0, 0],
-                           [1, 0, 1, 1, 0, 0, 0],
-                           [0, 1, 0, 1, 0, 0, 0],
-                           [0, 0, 1, 0, 1, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER1)
-
-    # Diagonal II
-    test_board = np.array([[0, 0, 1, 0, 0, 0, 0],
-                           [1, 0, 1, 1, 0, 0, 0],
-                           [0, 1, 0, 1, 0, 0, 0],
-                           [1, 0, 1, 0, 0, 0, 0],
-                           [0, 1, 0, 0, 0, 0, 0],
-                           [1, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER1)
-
-    # No connection
-    test_board = np.array([[0, 0, 1, 0, 0, 0, 0],
-                           [1, 0, 1, 1, 0, 0, 0],
-                           [0, 1, 0, 1, 0, 0, 0],
-                           [0, 0, 1, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert not cc.connected_four(test_board, cc.PLAYER1)
-
-    # player 2 - no connection
-    test_board = np.array([[0, 2, 1, 2, 2, 1, 2],
-                           [1, 1, 1, 1, 2, 2, 0],
-                           [0, 1, 2, 1, 0, 0, 0],
-                           [2, 0, 1, 0, 0, 0, 0],
-                           [0, 0, 2, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert not cc.connected_four(test_board, cc.PLAYER2)
-
-    # Diagonal II player 2
-    test_board = np.array([[2, 2, 1, 2, 2, 1, 0],
-                           [1, 2, 1, 1, 1, 2, 0],
-                           [1, 1, 2, 1, 2, 0, 0],
-                           [1, 2, 1, 2, 0, 0, 0],
-                           [2, 1, 2, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0]], dtype=np.int8)
-    assert cc.connected_four(test_board, cc.PLAYER2)
 
 def test_end_state():
     # Player one should still be playing

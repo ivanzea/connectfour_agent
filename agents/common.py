@@ -81,9 +81,9 @@ def string_to_board(pp_board: str) -> np.ndarray:
         np.ndarray: (6, 7) matrix with Player pieces
     """
     # Define parsing dictionary
-    p_dict = {'  ': '0',
-              'O ': '1',
+    p_dict = {'O ': '1',
               'X ': '2',
+              '  ': '0',
               '|': ''}
 
     # Remove top and bottom edges as well as columns
@@ -119,19 +119,28 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
     :return:
         np.ndarray: game board with the new player action added to its state
     """
-    # What is up with the copy part? todo
-
     # Check if the action is executable
     if np.isin(action, possible_actions(board)):  # no full column
         # Find location row of the action
         i = np.argwhere(board[:, action] == NO_PLAYER).min()
 
-        # Update the board
-        board[i, action] = player
-        return board
+        # Make a copy for past and present state functionality
+        if copy:
+            cp_board = board.copy()
+            # Update the board
+            cp_board[i, action] = player
+            return cp_board
+        else:
+            # Update the board
+            board[i, action] = player
+            return board
     else:
-        # No action taken
-        return board
+        if copy:
+            cp_board = board.copy()
+            return cp_board
+        else:
+            # No action taken
+            return board
 
 
 def connected_four(board: np.ndarray, player: BoardPiece, last_action: Optional[PlayerAction] = None, ) -> bool:
@@ -185,11 +194,11 @@ def check_end_state(board: np.ndarray, player: BoardPiece, last_action: Optional
 
 def possible_actions(board: np.ndarray) -> np.ndarray:
     """
-    Checks the game board columns to see which ones are not full and returns an array of possible columns in which
+    Checks the game board top column to see which ones are not full and returns an array of possible columns in which
     it is still possible to play a Player piece
     :param board:
         np.ndarray: current state of the board, filled with Player pieces
     :return:
         np.ndarray: vector with possible player actions to take
     """
-    return np.argwhere(np.sum(board == NO_PLAYER, axis=0) > 0)
+    return np.where(board[-1, :] == 0)[0]
