@@ -4,7 +4,7 @@ common.py:
 """
 # Import packages
 import numpy as np
-from scipy.signal import convolve2d
+from numba import njit
 from enum import Enum
 from typing import Optional
 from typing import Callable, Tuple
@@ -143,6 +143,7 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
             return board
 
 
+@njit()
 def connected_four(board: np.ndarray, player: BoardPiece, last_action: Optional[PlayerAction] = None, ) -> bool:
     """
     Check in the current game board if the specified player has won the game or not. This is implemented using
@@ -156,20 +157,39 @@ def connected_four(board: np.ndarray, player: BoardPiece, last_action: Optional[
     :return:
         bool: flag indicating if the player has won or not
     """
-    # Define kernels for winning conditions
-    horizontal_4 = np.array([[1, 1, 1, 1]])
-    vertical_4 = np.array([[1], [1], [1], [1]])
-    diag_4 = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-    diag_inv_4 = np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]])
-    win_conditions = [horizontal_4, vertical_4, diag_4, diag_inv_4]
+    # Number of consecutive Player pieces considered winning condition
+    connect_n = 4
 
-    # Make a board that contains only the specified player pieces
-    player_board = initialize_game_state()
-    player_board[board == player] = player
+    # Initialize variables
+    rows, cols = board.shape
+    rows_edge = rows - connect_n + 1
+    cols_edge = cols - connect_n + 1
 
-    # Convolve kernels on the game board to check for a win
-    win = np.any([(convolve2d(player_board, k, mode='valid') == 4).any() for k in win_conditions])
-    return win
+    # Horizontal win
+    for i in range(rows):
+        for j in range(cols_edge):
+            if np.all(board[i, j:j + connect_n] == player):
+                return True
+
+    # Vertical win
+    for i in range(rows_edge):
+        for j in range(cols):
+            if np.all(board[i:i + connect_n, j] == player):
+                return True
+
+    # Diagonal win
+    for i in range(rows_edge):
+        for j in range(cols_edge):
+            block = board[i:i + connect_n, j:j + connect_n]
+            # Diagonal R
+            if np.all(np.diag(block) == player):
+                return True
+            # Diagonal L
+            if np.all(np.diag(block[::-1, :]) == player):
+                return True
+
+    # No winning condition found
+    return False
 
 
 def check_end_state(board: np.ndarray, player: BoardPiece, last_action: Optional[PlayerAction] = None, ) -> GameState:

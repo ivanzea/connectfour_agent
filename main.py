@@ -46,7 +46,7 @@ def human_vs_agent(
                 t0 = time.time()
                 print(pretty_print_board(board))
                 print(
-                    f'{player_name} you are playing with {"X" if player == PLAYER1 else "O"}'
+                    f'{player_name} you are playing with {"O" if player == PLAYER1 else "X"}'
                 )
                 action, saved_state[player] = gen_move(
                     board.copy(), player, saved_state[player], *args
@@ -60,7 +60,7 @@ def human_vs_agent(
                         print("Game ended in draw")
                     else:
                         print(
-                            f'{player_name} won playing {"X" if player == PLAYER1 else "O"}'
+                            f'{player_name} won playing {"O" if player == PLAYER1 else "X"}'
                         )
                     playing = False
                     break
