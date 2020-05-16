@@ -26,40 +26,71 @@ def generate_move_minimax(
         PlayerAction: column to play based on the minimax algorithm
     """
     # Apply minimax algorithm
-    action = minimax(board=board, player=player)
+    action, _ = minimax(board=board, player=player,
+                        depth=2, alpha=-np.infty, beta=np.infty, maxPlayer=True)
 
     return action, saved_state
 
 
-def minimax(board: np.ndarray, player: BoardPiece):
+def minimax(board: np.ndarray, player: BoardPiece,
+            depth: int, alpha: float, beta: float, maxPlayer: bool) -> (PlayerAction, float):
     """
     Minimax algorithm
     :param board:
         np.ndarray: current state of the board, filled with Player pieces
     :param player:
-        BoardPiece: player piece to evaluate for best move
+        BoardPiece: player piece to evaluate for best move (maximazing player)
+    :param depth:
+        int: depth of tree search
+    :param alpha:
+        float: keep track of best score
+    :param beta:
+        float: keep track of worst score
+    :param maxPlayer:
+        bool: flag if the maximizing player is playing
     :return:
-        PlayerAction: best possible action
+        (PlayerAction, float): best possible action and its score
     """
-    # Score the board and player possible actions
+    # Get possible moves
+    # Player possible actions
     poss_actions = cc.possible_actions(board=board)
-    poss_actions = poss_actions[np.argsort(np.abs(poss_actions-3))]  # center search bias
-    action = PlayerAction(poss_actions[0])
-    score = board_score(board=board, player=player)
+    poss_actions = poss_actions[np.argsort(np.abs(poss_actions - 3))]  # center search bias
+    pieces = np.array([PLAYER1, PLAYER2])
 
-    for moves in poss_actions:
-        # How would a mover change my score?
-        move_board = cc.apply_player_action(board=board, action=moves, player=player, copy=True)
-        move_score = board_score(board=move_board, player=player)
-        #print(f'{moves} = {move_score}')
-        # Does it result in a better value?
-        if move_score > score:
-            #print(f'{moves} -> {move_score} > {score}')
-            # Update variables
-            score = move_score
-            action = moves
+    # Final or end state node reached
+    if (depth == 0) | (cc.check_end_state(board=board, player=player) != cc.GameState.STILL_PLAYING):
+        return None, board_score(board=board, player=player)
 
-    return action
+    if maxPlayer:
+        # Initialize score
+        max_score = -np.infty
+
+        for moves in poss_actions:
+            # How would a mover change my score?
+            move_board = cc.apply_player_action(board=board, action=moves, player=player, copy=True)
+            score = minimax(board=move_board, player=player, depth=depth-1,
+                            alpha=alpha, beta=beta, maxPlayer=False)[1]
+            if score > max_score:
+                max_score = score
+                action = moves
+            alpha = max(alpha, score)
+            if beta <= alpha:
+                break
+        return action, max_score
+    else:
+        # Initialize opponent score
+        min_score = np.infty
+        opponent = pieces[pieces != player][0]
+        for moves in poss_actions:
+            # How would a mover change my score?
+            move_board = cc.apply_player_action(board=board, action=moves, player=opponent, copy=True)
+            score = minimax(board=move_board, player=player, depth=depth - 1,
+                            alpha=alpha, beta=beta, maxPlayer=True)[1]
+            if score < min_score:
+                min_score = score
+                action = moves
+            beta = min(beta, score)
+        return action, min_score
 
 
 @njit()

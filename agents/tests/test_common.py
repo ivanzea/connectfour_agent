@@ -5,7 +5,7 @@ test_common.py:
 # Import packages
 import numpy as np
 import agents.common as cc
-from agents.common import  PlayerAction, BoardPiece
+from agents.common import PlayerAction, BoardPiece
 from agents.common import NO_PLAYER, PLAYER1, PLAYER2
 
 def test_initialize_game_state():
