@@ -1,1 +1,1 @@
-from .minmax import generate_move_minmax as generate_move
+from .minimax import generate_move_minimax as generate_move

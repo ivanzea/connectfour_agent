@@ -73,8 +73,8 @@ def test_string_to_board():
                    '|              |\n'
                    '|              |\n'
                    '|              |\n'
-                   '|      X       |\n' # PLAYER2 at (1, 3)
-                   '|      O       |\n' # PLAYER1 at (0, 3)
+                   '|      X       |\n'  # PLAYER2 at (1, 3)
+                   '|      O       |\n'  # PLAYER1 at (0, 3)
                    '|--------------|\n'
                    '|0 1 2 3 4 5 6 |\n')
 

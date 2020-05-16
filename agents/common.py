@@ -54,11 +54,11 @@ def pretty_print_board(board: np.ndarray) -> str:
     """
     # Define parsing dictionary
     p_dict = {' ': '',
-             '0': '  ',
-             '1': 'O ',
-             '2': 'X ',
-             '[': '|',
-             ']': '|'}
+              '0': '  ',
+              '1': 'O ',
+              '2': 'X ',
+              '[': '|',
+              ']': '|'}
 
     # Remove extra [...] and flip to make [0, 0] bottom corner
     str_board = f'{np.flipud(board)}'[1:-1]
