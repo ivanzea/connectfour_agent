@@ -26,8 +26,8 @@ def generate_move_minimax(
         PlayerAction: column to play based on the minimax algorithm
     """
     # Apply minimax algorithm
-    action, _ = minimax(board=board, player=player,
-                        depth=6, alpha=-np.infty, beta=np.infty, maxplayer=True)
+    action, _ = minimax(board=board, player=player, depth=6,
+                        alpha=-np.infty, beta=np.infty, maxplayer=True)
 
     return action, saved_state
 
@@ -35,7 +35,7 @@ def generate_move_minimax(
 def minimax(board: np.ndarray, player: BoardPiece,
             depth: int, alpha: float, beta: float, maxplayer: bool) -> (PlayerAction, float):
     """
-    Minimax algorithm
+    Minimax algorithm with alpha-beta pruning
     :param board:
         np.ndarray: current state of the board, filled with Player pieces
     :param player:
@@ -59,7 +59,14 @@ def minimax(board: np.ndarray, player: BoardPiece,
 
     # Final or end state node reached
     if (depth == 0) | (cc.check_end_state(board=board, player=player) != cc.GameState.STILL_PLAYING):
-        return None, board_score(board=board, player=player)
+        if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & maxplayer:
+            return None, 10000
+        if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & ~maxplayer:
+            return None, -10000
+        if cc.check_end_state(board=board, player=player) == cc.GameState.IS_DRAW:
+            return None, 0
+        else:
+            return None, board_score(board=board, player=player)
 
     if maxplayer:
         # Initialize score
@@ -106,13 +113,20 @@ def board_score(board: np.ndarray, player: BoardPiece) -> float:
         float: total state of the board heuristic score
     """
     # Number of consecutive Player pieces considered winning condition
-    connect_length = [2, 3, 4]
-    score_dict = [1, 10, 1000]
+    p = player
+    n = NO_PLAYER
+    connect_patterns = np.array([[p, p, p, n],
+                                 [p, p, n, p],
+                                 [p, p, n, n],
+                                 [p, n, p, n],
+                                 [p, n, n, p]])
+    score_dict = [50, 50, 10, 10, 5]
+    connect_n = 4
 
     # Initialize score
     score = 0
 
-    for connect_n, dict_val in zip(connect_length, score_dict):
+    for pattern, dict_val in zip(connect_patterns, score_dict):
         # Initialize variables
         rows, cols = board.shape
         rows_edge = rows - connect_n + 1
@@ -121,23 +135,23 @@ def board_score(board: np.ndarray, player: BoardPiece) -> float:
         # Horizontal scoring
         for i in range(rows):
             for j in range(cols_edge):
-                if np.all(board[i, j:j + connect_n] == player):
+                if np.all(board[i, j:j + connect_n] == pattern) | np.all(board[i, j:j + connect_n] == pattern[::-1]):
                     score += dict_val
 
         # Vertical scoring
         for i in range(rows_edge):
             for j in range(cols):
-                if np.all(board[i:i + connect_n, j] == player):
+                if np.all(board[i:i + connect_n, j] == pattern) | np.all(board[i:i + connect_n, j] == pattern[::-1]):
                     score += dict_val
 
         # Diagonal scoring
         for i in range(rows_edge):
             for j in range(cols_edge):
                 block = board[i:i + connect_n, j:j + connect_n]
-                # Diagonal R
-                if np.all(np.diag(block) == player):
+                # Diagonal
+                if np.all(np.diag(block) == pattern) | np.all(np.diag(block) == pattern[::-1]):
                     score += dict_val
                 # Diagonal L
-                if np.all(np.diag(block[::-1, :]) == player):
+                if np.all(np.diag(block[::-1, :]) == pattern) | np.all(np.diag(block[::-1, :]) == pattern[::-1]):
                     score += dict_val
     return score
