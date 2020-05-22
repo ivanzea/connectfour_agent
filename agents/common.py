@@ -120,9 +120,9 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
         np.ndarray: game board with the new player action added to its state
     """
     # Check if the action is executable
-    if np.isin(action, possible_actions(board)):  # no full column
+    if np.any(action == possible_actions(board)):  # no full column
         # Find location row of the action
-        i = np.argwhere(board[:, action] == NO_PLAYER).min()
+        i = np.sum(board[:, action] != NO_PLAYER)
 
         # Make a copy for past and present state functionality
         if copy:
@@ -221,4 +221,4 @@ def possible_actions(board: np.ndarray) -> np.ndarray:
     :return:
         np.ndarray: vector with possible player actions to take
     """
-    return np.where(board[-1, :] == 0)[0]
+    return np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER]

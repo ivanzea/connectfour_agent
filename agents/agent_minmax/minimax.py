@@ -60,9 +60,9 @@ def minimax(board: np.ndarray, player: BoardPiece,
     # Final or end state node reached
     if (depth == 0) | (cc.check_end_state(board=board, player=player) != cc.GameState.STILL_PLAYING):
         if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & maxplayer:
-            return None, 10000
+            return None, 10000 - depth
         if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & ~maxplayer:
-            return None, -10000
+            return None, -(10000 - depth)
         if cc.check_end_state(board=board, player=player) == cc.GameState.IS_DRAW:
             return None, 0
         else:
@@ -77,6 +77,10 @@ def minimax(board: np.ndarray, player: BoardPiece,
             move_board = cc.apply_player_action(board=board, action=moves, player=player, copy=True)
             score = minimax(board=move_board, player=player, depth=depth-1,
                             alpha=alpha, beta=beta, maxplayer=False)[1]
+
+            # Score modifiers
+            score = score - depth + (3 - np.abs(moves - 3))
+
             if score > max_score:
                 max_score = score
                 action = moves
@@ -92,8 +96,12 @@ def minimax(board: np.ndarray, player: BoardPiece,
         for moves in poss_actions:
             # How would a mover change my score?
             move_board = cc.apply_player_action(board=board, action=moves, player=opponent, copy=True)
-            score = -minimax(board=move_board, player=opponent, depth=depth - 1,
+            score = minimax(board=move_board, player=opponent, depth=depth - 1,
                             alpha=alpha, beta=beta, maxplayer=True)[1]
+
+            # Score modifiers
+            score = -(score - depth + (3 - np.abs(moves - 3)))
+
             if score < min_score:
                 min_score = score
                 action = moves

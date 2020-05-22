@@ -66,4 +66,4 @@ def human_vs_agent(
                     break
 
 if __name__ == "__main__":
-    human_vs_agent(generate_move)
+    human_vs_agent(generate_move, generate_move)
