@@ -1,7 +1,10 @@
-import numpy as np
 from typing import Optional, Callable
-from agents.common import PlayerAction, BoardPiece, SavedState, GenMove
+
+import numpy as np
+
 from agents.agent_minmax import generate_move
+from agents.common import PlayerAction, BoardPiece, SavedState, GenMove
+
 
 def user_move(board: np.ndarray, _player: BoardPiece, saved_state: Optional[SavedState]):
     action = PlayerAction(-1)

@@ -3,11 +3,12 @@ common.py:
     Common data types, classes, and functions used to play the connect 4 game
 """
 # Import packages
+from enum import Enum
+from typing import Callable, Tuple
+from typing import Optional
+
 import numpy as np
 from numba import njit
-from enum import Enum
-from typing import Optional
-from typing import Callable, Tuple
 
 # Define i/o data types
 PlayerAction = np.int8

@@ -3,12 +3,14 @@ minimax.py
     Implementation of a connect 4 agent that plays using the minimax algorithm
 """
 # Import packages
+from typing import Tuple, Optional
+
 import numpy as np
 from numba import njit
+
 import agents.common as cc
 from agents.common import BoardPiece, SavedState, PlayerAction
 from agents.common import PLAYER1, PLAYER2, NO_PLAYER
-from typing import Tuple, Optional
 
 
 def generate_move_minimax(
