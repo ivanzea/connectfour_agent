@@ -120,7 +120,7 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
         np.ndarray: game board with the new player action added to its state
     """
     # Check if the action is executable
-    if np.any(action == possible_actions(board)):  # no full column
+    if np.any(action == (np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER])):  # no full column
         # Find location row of the action
         i = np.sum(board[:, action] != NO_PLAYER)
 
@@ -207,18 +207,7 @@ def check_end_state(board: np.ndarray, player: BoardPiece, last_action: Optional
     # Check for a win condition
     if connected_four(board, player):
         return GameState.IS_WIN
-    elif possible_actions(board).shape[0] == 0:   # check for no more possible actions... a draw
+    elif (np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER]).shape[0] == 0:   # check for no more possible actions... a draw
         return GameState.IS_DRAW
     else:
         return GameState.STILL_PLAYING
-
-def possible_actions(board: np.ndarray) -> np.ndarray:
-    """
-    Checks the game board top column to see which ones are not full and returns an array of possible columns in which
-    it is still possible to play a Player piece
-    :param board:
-        np.ndarray: current state of the board, filled with Player pieces
-    :return:
-        np.ndarray: vector with possible player actions to take
-    """
-    return np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER]

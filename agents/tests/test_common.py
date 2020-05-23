@@ -134,7 +134,7 @@ def test_apply_player_action():
     theoretical_sum = np.zeros((board.shape[1],))
 
     # Play with random agents until board is full
-    while cc.possible_actions(board).shape[0] != 0:
+    while (np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER]).shape[0] != 0:
         # Who is playing?
         player = players[player_turn]
 
@@ -148,7 +148,7 @@ def test_apply_player_action():
         # Calculate the sum of columns in the output
         empirical_sum = out.sum(axis=0)
 
-        if np.isin(action, cc.possible_actions(board)):
+        if np.isin(action, (np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER])):
             # The action can be taken and the corresponding player piece should affect the corresponding column
             # Update the theoretical sum of columns
             theoretical_sum[action] += player

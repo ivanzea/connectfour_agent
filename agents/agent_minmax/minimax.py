@@ -53,16 +53,16 @@ def minimax(board: np.ndarray, player: BoardPiece,
     """
     # Get possible moves
     # Player possible actions
-    poss_actions = cc.possible_actions(board=board)
+    poss_actions = (np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER])
     poss_actions = poss_actions[np.argsort(np.abs(poss_actions - 3))]  # center search bias
     pieces = np.array([PLAYER1, PLAYER2])
 
     # Final or end state node reached
     if (depth == 0) | (cc.check_end_state(board=board, player=player) != cc.GameState.STILL_PLAYING):
         if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & maxplayer:
-            return None, 10000 - depth
+            return None, 10000
         if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & ~maxplayer:
-            return None, -(10000 - depth)
+            return None, -10000
         if cc.check_end_state(board=board, player=player) == cc.GameState.IS_DRAW:
             return None, 0
         else:
@@ -79,7 +79,7 @@ def minimax(board: np.ndarray, player: BoardPiece,
                             alpha=alpha, beta=beta, maxplayer=False)[1]
 
             # Score modifiers
-            score = score - depth + (3 - np.abs(moves - 3))
+            score = score + (3 - np.abs(moves - 3))
 
             if score > max_score:
                 max_score = score
@@ -100,7 +100,7 @@ def minimax(board: np.ndarray, player: BoardPiece,
                             alpha=alpha, beta=beta, maxplayer=True)[1]
 
             # Score modifiers
-            score = -(score - depth + (3 - np.abs(moves - 3)))
+            score = -(score + (3 - np.abs(moves - 3)))
 
             if score < min_score:
                 min_score = score

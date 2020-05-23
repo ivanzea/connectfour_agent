@@ -25,6 +25,6 @@ def generate_move_random(
         PlayerAction: random column to play
     """
     # Choose a valid, non-full column randomly and return it as `action`
-    action = PlayerAction(np.random.choice(cc.possible_actions(board)))
+    action = PlayerAction(np.random.choice(np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER]))
 
     return action, saved_state
