@@ -3,7 +3,6 @@ from typing import Optional, Callable
 import numpy as np
 
 from agents.agent_minimax import generate_move
-from agents.agent_base import generate_move_base
 from agents.common import PlayerAction, BoardPiece, SavedState, GenMove
 
 
@@ -61,5 +60,4 @@ def agent_vs_agent(
                     break
 
 if __name__ == "__main__":
-    optim = np.array([0, 0, 0, 0, 0])
-    agent_vs_agent(generate_move_base, generate_move, encounters=1, args_2=(optim,))
+    agent_vs_agent(generate_move, generate_move, encounters=1)

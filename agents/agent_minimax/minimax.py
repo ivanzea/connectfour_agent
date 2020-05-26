@@ -66,9 +66,9 @@ def minimax(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray,
     # Final or end state node reached
     if (depth == 0) | (cc.check_end_state(board=board, player=player) != cc.GameState.STILL_PLAYING):
         if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & maxplayer:
-            return None, 0
+            return None, 1000
         if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & ~maxplayer:
-            return None, -0
+            return None, -1000
         if cc.check_end_state(board=board, player=player) == cc.GameState.IS_DRAW:
             return None, 0
         else:
@@ -83,9 +83,6 @@ def minimax(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray,
             move_board = cc.apply_player_action(board=board, action=moves, player=player, copy=True)
             score = minimax(board=move_board, player=player, score_dict=score_dict, depth=depth-1,
                             alpha=alpha, beta=beta, maxplayer=False)[1]
-
-            # Score modifiers
-            score = score + (3 - np.abs(moves - 3))
 
             if score > max_score:
                 max_score = score
@@ -104,9 +101,6 @@ def minimax(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray,
             move_board = cc.apply_player_action(board=board, action=moves, player=opponent, copy=True)
             score = minimax(board=move_board, player=opponent, score_dict=score_dict, depth=depth - 1,
                             alpha=alpha, beta=beta, maxplayer=True)[1]
-
-            # Score modifiers
-            score = -(score + (3 - np.abs(moves - 3)))
 
             if score < min_score:
                 min_score = score
@@ -150,13 +144,13 @@ def board_score(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray) -
         # Horizontal scoring
         for i in range(rows):
             for j in range(cols_edge):
-                if np.all(board[i, j:j + connect_n] == pattern) | np.all(board[i, j:j + connect_n] == pattern[::-1]):
+                if np.all(board[i, j:j + connect_n] == pattern) or np.all(board[i, j:j + connect_n] == pattern[::-1]):
                     score += dict_val
 
         # Vertical scoring
         for i in range(rows_edge):
             for j in range(cols):
-                if np.all(board[i:i + connect_n, j] == pattern) | np.all(board[i:i + connect_n, j] == pattern[::-1]):
+                if np.all(board[i:i + connect_n, j] == pattern) or np.all(board[i:i + connect_n, j] == pattern[::-1]):
                     score += dict_val
 
         # Diagonal scoring
@@ -164,9 +158,9 @@ def board_score(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray) -
             for j in range(cols_edge):
                 block = board[i:i + connect_n, j:j + connect_n]
                 # Diagonal
-                if np.all(np.diag(block) == pattern) | np.all(np.diag(block) == pattern[::-1]):
+                if np.all(np.diag(block) == pattern) or np.all(np.diag(block) == pattern[::-1]):
                     score += dict_val
                 # Diagonal L
-                if np.all(np.diag(block[::-1, :]) == pattern) | np.all(np.diag(block[::-1, :]) == pattern[::-1]):
+                if np.all(np.diag(block[::-1, :]) == pattern) or np.all(np.diag(block[::-1, :]) == pattern[::-1]):
                     score += dict_val
     return score
