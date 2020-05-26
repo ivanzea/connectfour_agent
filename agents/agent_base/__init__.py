@@ -1,0 +1,1 @@
+from .minimax_base import generate_move_minimax_base as generate_move_base

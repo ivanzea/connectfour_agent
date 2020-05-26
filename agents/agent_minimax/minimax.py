@@ -3,7 +3,7 @@ minimax.py
     Implementation of a connect 4 agent that plays using the minimax algorithm
 """
 # Import packages
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 
 import numpy as np
 from numba import njit
@@ -14,7 +14,7 @@ from agents.common import PLAYER1, PLAYER2, NO_PLAYER
 
 
 def generate_move_minimax(
-        board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState]
+        board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], score_dict = np.array([50, 50, 10, 10, 5])
 ) -> Tuple[PlayerAction, Optional[SavedState]]:
     """
     Choose an action based on the minimax algorithm
@@ -22,19 +22,21 @@ def generate_move_minimax(
         np.ndarray: current state of the board, filled with Player pieces
     :param player:
         BoardPiece: player piece to check for best move
+    :param score_dict:
+        np.ndarray: list of score points to give to the different patterns... see board_score
     :param saved_state:
         SavedState: standard generate_move input... not used in this case
     :return:
         PlayerAction: column to play based on the minimax algorithm
     """
     # Apply minimax algorithm
-    action, _ = minimax(board=board, player=player, depth=6,
+    action, _ = minimax(board=board, player=player, score_dict=score_dict, depth=6,
                         alpha=-np.infty, beta=np.infty, maxplayer=True)
 
     return action, saved_state
 
 
-def minimax(board: np.ndarray, player: BoardPiece,
+def minimax(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray,
             depth: int, alpha: float, beta: float, maxplayer: bool) -> (PlayerAction, float):
     """
     Minimax algorithm with alpha-beta pruning
@@ -42,6 +44,8 @@ def minimax(board: np.ndarray, player: BoardPiece,
         np.ndarray: current state of the board, filled with Player pieces
     :param player:
         BoardPiece: player piece to evaluate for best move (maximazing player)
+    :param score_dict:
+        np.ndarray: list of score points to give to the different patterns... see board_score
     :param depth:
         int: depth of tree search
     :param alpha:
@@ -62,13 +66,13 @@ def minimax(board: np.ndarray, player: BoardPiece,
     # Final or end state node reached
     if (depth == 0) | (cc.check_end_state(board=board, player=player) != cc.GameState.STILL_PLAYING):
         if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & maxplayer:
-            return None, 10000
+            return None, 0
         if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & ~maxplayer:
-            return None, -10000
+            return None, -0
         if cc.check_end_state(board=board, player=player) == cc.GameState.IS_DRAW:
             return None, 0
         else:
-            return None, board_score(board=board, player=player)
+            return None, board_score(board=board, player=player, score_dict=score_dict)
 
     if maxplayer:
         # Initialize score
@@ -77,7 +81,7 @@ def minimax(board: np.ndarray, player: BoardPiece,
         for moves in poss_actions:
             # How would a mover change my score?
             move_board = cc.apply_player_action(board=board, action=moves, player=player, copy=True)
-            score = minimax(board=move_board, player=player, depth=depth-1,
+            score = minimax(board=move_board, player=player, score_dict=score_dict, depth=depth-1,
                             alpha=alpha, beta=beta, maxplayer=False)[1]
 
             # Score modifiers
@@ -98,7 +102,7 @@ def minimax(board: np.ndarray, player: BoardPiece,
         for moves in poss_actions:
             # How would a mover change my score?
             move_board = cc.apply_player_action(board=board, action=moves, player=opponent, copy=True)
-            score = minimax(board=move_board, player=opponent, depth=depth - 1,
+            score = minimax(board=move_board, player=opponent, score_dict=score_dict, depth=depth - 1,
                             alpha=alpha, beta=beta, maxplayer=True)[1]
 
             # Score modifiers
@@ -112,13 +116,15 @@ def minimax(board: np.ndarray, player: BoardPiece,
 
 
 @njit()
-def board_score(board: np.ndarray, player: BoardPiece) -> float:
+def board_score(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray) -> float:
     """
     Apply a heuristic scoring algorithm for a game board
     :param board:
         np.ndarray: current state of the board, filled with Player pieces
     :param player:
         BoardPiece: type of Player piece to check for score
+    :param score_dict:
+        np.ndarray: list of score points to give to the different patterns... see board_score
     :return:
         float: total state of the board heuristic score
     """
@@ -130,7 +136,6 @@ def board_score(board: np.ndarray, player: BoardPiece) -> float:
                                  [p, p, n, n],
                                  [p, n, p, n],
                                  [p, n, n, p]])
-    score_dict = [50, 50, 10, 10, 5]
     connect_n = 4
 
     # Initialize score

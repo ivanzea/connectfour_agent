@@ -2,25 +2,17 @@ from typing import Optional, Callable
 
 import numpy as np
 
-from agents.agent_minmax import generate_move
+from agents.agent_minimax import generate_move
+from agents.agent_base import generate_move_base
 from agents.common import PlayerAction, BoardPiece, SavedState, GenMove
 
 
-def user_move(board: np.ndarray, _player: BoardPiece, saved_state: Optional[SavedState]):
-    action = PlayerAction(-1)
-    while not 0 <= action < board.shape[1]:
-        try:
-            action = PlayerAction(input("Column? "))
-        except:
-            pass
-    return action, saved_state
-
-
-def human_vs_agent(
+def agent_vs_agent(
     generate_move_1: GenMove,
-    generate_move_2: GenMove = user_move,
-    player_1: str = "Player 1",
-    player_2: str = "Player 2",
+    generate_move_2: GenMove,
+    encounters: int,
+    player_1: str = "Base",
+    player_2: str = "Optim",
     args_1: tuple = (),
     args_2: tuple = (),
     init_1: Callable = lambda board, player: None,
@@ -31,7 +23,7 @@ def human_vs_agent(
     from agents.common import initialize_game_state, pretty_print_board, apply_player_action, check_end_state
 
     players = (PLAYER1, PLAYER2)
-    for play_first in (1, -1):
+    for play_first in np.repeat((1, -1), encounters):
         for init, player in zip((init_1, init_2)[::play_first], players):
             init(initialize_game_state(), player)
 
@@ -47,18 +39,18 @@ def human_vs_agent(
                 players, player_names, gen_moves, gen_args,
             ):
                 t0 = time.time()
-                print(pretty_print_board(board))
-                print(
-                    f'{player_name} you are playing with {"O" if player == PLAYER1 else "X"}'
-                )
+                #print(pretty_print_board(board))
+                #print(
+                #    f'{player_name} you are playing with {"O" if player == PLAYER1 else "X"}'
+                #)
                 action, saved_state[player] = gen_move(
                     board.copy(), player, saved_state[player], *args
                 )
-                print(f"Move time: {time.time() - t0:.3f}s")
+                print(f"{player_name} move time: {time.time() - t0:.3f}s")
                 apply_player_action(board, action, player)
                 end_state = check_end_state(board, player)
                 if end_state != GameState.STILL_PLAYING:
-                    print(pretty_print_board(board))
+                    #print(pretty_print_board(board))
                     if end_state == GameState.IS_DRAW:
                         print("Game ended in draw")
                     else:
@@ -69,4 +61,5 @@ def human_vs_agent(
                     break
 
 if __name__ == "__main__":
-    human_vs_agent(generate_move, generate_move)
+    optim = np.array([0, 0, 0, 0, 0])
+    agent_vs_agent(generate_move_base, generate_move, encounters=1, args_2=(optim,))
