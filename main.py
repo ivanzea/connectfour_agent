@@ -38,10 +38,10 @@ def agent_vs_agent(
                 players, player_names, gen_moves, gen_args,
             ):
                 t0 = time.time()
-                #print(pretty_print_board(board))
-                #print(
-                #    f'{player_name} you are playing with {"O" if player == PLAYER1 else "X"}'
-                #)
+                print(pretty_print_board(board))
+                print(
+                    f'{player_name} you are playing with {"O" if player == PLAYER1 else "X"}'
+                )
                 action, saved_state[player] = gen_move(
                     board.copy(), player, saved_state[player], *args
                 )
@@ -49,7 +49,7 @@ def agent_vs_agent(
                 apply_player_action(board, action, player)
                 end_state = check_end_state(board, player)
                 if end_state != GameState.STILL_PLAYING:
-                    #print(pretty_print_board(board))
+                    print(pretty_print_board(board))
                     if end_state == GameState.IS_DRAW:
                         print("Game ended in draw")
                     else:
