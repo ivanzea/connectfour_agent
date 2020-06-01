@@ -30,7 +30,7 @@ def generate_move_minimax(
         PlayerAction: column to play based on the minimax algorithm
     """
     # Apply minimax algorithm
-    action, _ = minimax(board=board, player=player, score_dict=score_dict, depth=6,
+    action, _ = minimax(board=board, player=player, score_dict=score_dict, depth=7,
                         alpha=-np.infty, beta=np.infty, maxplayer=True)
 
     return action, saved_state
