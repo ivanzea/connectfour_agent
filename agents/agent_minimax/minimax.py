@@ -64,12 +64,13 @@ def minimax(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray,
     pieces = np.array([PLAYER1, PLAYER2])
 
     # Final or end state node reached
-    if (depth == 0) | (cc.check_end_state(board=board, player=player) != cc.GameState.STILL_PLAYING):
-        if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & maxplayer:
-            return None, 10000 + depth
-        if (cc.check_end_state(board=board, player=player) == cc.GameState.IS_WIN) & ~maxplayer:
-            return None, -(10000 + depth)
-        if cc.check_end_state(board=board, player=player) == cc.GameState.IS_DRAW:
+    current_state = cc.check_end_state(board=board, player=player)
+    if (depth == 0) or (current_state != cc.GameState.STILL_PLAYING):
+        if (current_state == cc.GameState.IS_WIN) and ~maxplayer:
+            return None, 10000 - depth
+        if (current_state == cc.GameState.IS_WIN) and maxplayer:
+            return None, -(10000 - depth)
+        if current_state == cc.GameState.IS_DRAW:
             return None, 0
         else:
             return None, board_score(board=board, player=player, score_dict=score_dict)

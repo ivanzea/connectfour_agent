@@ -2,6 +2,7 @@ from typing import Optional, Callable
 
 import numpy as np
 
+from agents.agent_random import generate_move as gm_rand
 from agents.agent_minimax import generate_move
 from agents.common import PlayerAction, BoardPiece, SavedState, GenMove
 
@@ -10,8 +11,8 @@ def agent_vs_agent(
     generate_move_1: GenMove,
     generate_move_2: GenMove,
     encounters: int,
-    player_1: str = "Base",
-    player_2: str = "Optim",
+    player_1: str = "Player 1",
+    player_2: str = "Player 2",
     args_1: tuple = (),
     args_2: tuple = (),
     init_1: Callable = lambda board, player: None,
@@ -60,4 +61,4 @@ def agent_vs_agent(
                     break
 
 if __name__ == "__main__":
-    agent_vs_agent(generate_move, generate_move, encounters=1)
+    agent_vs_agent(gm_rand, generate_move, player_1='rand', player_2='minimax', encounters=1)
