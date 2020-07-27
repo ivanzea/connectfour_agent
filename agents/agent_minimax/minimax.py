@@ -59,7 +59,7 @@ def minimax(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray,
     """
     # Get possible moves
     # Player possible actions
-    poss_actions = (np.arange(board.shape[1])[board[-1, :] ==  NO_PLAYER])
+    poss_actions = (np.arange(board.shape[1], dtype=PlayerAction)[board[-1, :] ==  NO_PLAYER])
     poss_actions = poss_actions[np.argsort(np.abs(poss_actions - 3))]  # center search bias
     pieces = np.array([PLAYER1, PLAYER2])
 
@@ -67,9 +67,9 @@ def minimax(board: np.ndarray, player: BoardPiece, score_dict: np.ndarray,
     current_state = cc.check_end_state(board=board, player=player)
     if (depth == 0) or (current_state != cc.GameState.STILL_PLAYING):
         if (current_state == cc.GameState.IS_WIN) and ~maxplayer:
-            return None, 10000 - depth
+            return None, 10000 + depth
         if (current_state == cc.GameState.IS_WIN) and maxplayer:
-            return None, -(10000 - depth)
+            return None, -(10000 + depth)
         if current_state == cc.GameState.IS_DRAW:
             return None, 0
         else:

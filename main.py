@@ -3,9 +3,18 @@ from typing import Optional, Callable
 import numpy as np
 
 from agents.agent_random import generate_move as gm_rand
-from agents.agent_minimax import generate_move
+from agents.agent_mcts.mcts_optim import generate_move_mcts as gm_mcts
+from agents.agent_minimax import generate_move as gm_minimax
 from agents.common import PlayerAction, BoardPiece, SavedState, GenMove
 
+def user_move(board: np.ndarray, _player: BoardPiece, saved_state: Optional[SavedState]):
+    action = PlayerAction(-1)
+    while not 0 <= action < board.shape[1]:
+        try:
+            action = PlayerAction(input("Column? "))
+        except:
+            pass
+    return action, saved_state
 
 def agent_vs_agent(
     generate_move_1: GenMove,
@@ -43,9 +52,10 @@ def agent_vs_agent(
                 print(
                     f'{player_name} you are playing with {"O" if player == PLAYER1 else "X"}'
                 )
+
                 action, saved_state[player] = gen_move(
-                    board.copy(), player, saved_state[player], *args
-                )
+                    board.copy(), player, saved_state[player], *args)
+
                 print(f"{player_name} move time: {time.time() - t0:.3f}s")
                 apply_player_action(board, action, player)
                 end_state = check_end_state(board, player)
@@ -61,4 +71,4 @@ def agent_vs_agent(
                     break
 
 if __name__ == "__main__":
-    agent_vs_agent(gm_rand, generate_move, player_1='rand', player_2='minimax', encounters=1)
+    agent_vs_agent(gm_mcts, user_move, player_1='mcts', player_2='human', encounters=1)

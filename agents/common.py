@@ -10,6 +10,7 @@ from typing import Optional
 import numpy as np
 from numba import njit
 
+
 # Define i/o data types
 PlayerAction = np.int8
 BoardPiece = np.int8
@@ -27,8 +28,13 @@ class GameState(Enum):
 
 # Define save state class
 class SavedState:
-    # What is a saved state? todo
-    pass
+    def __init__(self, root, node):
+        # Delete parents from child nodes
+        for children in node.children.values():
+            children.parent = None
+
+        self.node = node
+        self.root = root
 
 # Define moves for agents
 GenMove = Callable[
